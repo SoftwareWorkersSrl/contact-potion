@@ -3,9 +3,9 @@
   <form id="contact_form" action="{{ url_for('contact') }}" method="post">
     {{ form.hidden_tag() }}
     {% for field in form %}
-      {% if field.type in ('CSRFTokenField', 'HiddenField', 'SubmitField') %}
+      {% if field.type in ('SubmitField') %}
         {{ field }}
-      {% else %}
+      {% elif field.type not in ('CSRFTokenField', 'HiddenField') %}
         <div class="field" id="field_{{ field.name }}">
           {{ field.label }}
           <span class="field">
