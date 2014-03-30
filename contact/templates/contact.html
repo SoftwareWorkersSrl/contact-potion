@@ -1,4 +1,25 @@
 {% extends skin %}
 {% block content %}
-  Hello World!
+  <form id="contact_form" action="{{ url_for('contact') }}" method="post">
+    {{ form.hidden_tag() }}
+    {% for field in form %}
+      {% if field.type in ('CSRFTokenField', 'HiddenField', 'SubmitField') %}
+        {{ field }}
+      {% else %}
+        <div class="field" id="field_{{ field.name }}">
+          {{ field.label }}
+          <span class="field">
+            {{ field }}
+          </span>
+          {% if field.errors %}
+            <span class="errors">
+              {% for error in field.errors %}
+                <span class="error">{{ error }}</span>
+              {% endfor %}
+            </span>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </form>
 {% endblock %}
