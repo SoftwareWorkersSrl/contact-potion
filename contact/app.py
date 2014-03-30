@@ -1,14 +1,17 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from forms import ContactForm
 
 app = Flask(__name__)
 app.secret_key = "Development Secret Key"
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def contact():
     skin = 'skin_development.html'
     form = ContactForm()
+    if request.method == 'POST':
+        if form.validate():
+            return "valid Form posted"
     return render_template('contact.html', skin=skin, form=form)
 
 
