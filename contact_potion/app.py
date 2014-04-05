@@ -18,6 +18,8 @@ mail.init_app(app)
 def contact():
     skin = 'skin_development.html'
     form = ContactForm()
+    form.category.choices = [('1', 'one'), (2, 'two')]
+    print(form.category.choices)
     if request.method == 'POST':
         if form.validate():
             send_message(form)
