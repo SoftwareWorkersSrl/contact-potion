@@ -1,21 +1,29 @@
 from flask import Flask, render_template, request
 from flask.ext.mail import Message, Mail
 from forms import ContactForm
+from ConfigParser import RawConfigParser
 
+import os
+
+MAGIC_HEADER = 'X-Contact-Potion-Config'
+CONFIG_ENV = 'CONTACT_POTION_CONFIG'
+
+config_filename = os.getenv(CONFIG_ENV, 'sample.config')
+config = RawConfigParser()
+config.read(config_filename)
 
 app = Flask(__name__)
-app.secret_key = "Development Secret Key"
-app.config['MAIL_SERVER'] = 'localhost'
-app.config['MAIL_PORT'] = 25
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_RECIPIENT'] = 'test@example.com'
-app.config['MAIL_SENDER'] = 'webmaster@example.com'
+app.secret_key = config.get('GLOBAL', 'secret_key')
+app.config['MAIL_SERVER'] = config.get('GLOBAL', 'mailserver')
+app.config['MAIL_PORT'] = config.getint('GLOBAL', 'mailport')
+app.config['MAIL_USE_SSL'] = config.getboolean('GLOBAL', 'mailusessl')
 
 mail = Mail()
 mail.init_app(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def contact():
+    config_section = 'default'
     skin = 'skin_development.html'
     form = ContactForm()
     form.category.choices = [('1', 'one'), (2, 'two')]
@@ -27,7 +35,7 @@ def contact():
     return render_template('contact.html', skin=skin, form=form)
 
 
-def send_message(form):
+def send_message(form, app):
     message = Message(form.subject.data,
                       sender=app.config['MAIL_SENDER'],
                       recipients=['mike@bloy.org'])
