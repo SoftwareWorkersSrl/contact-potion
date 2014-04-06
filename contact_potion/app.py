@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 from flask.ext.mail import Message, Mail
 from forms import ContactForm
 from wsgi import ReverseProxied
 from ConfigParser import RawConfigParser
-
 import os
+import re
 
 MAGIC_HEADER = 'X-Contact-Potion-Config'
 CONFIG_ENV = 'CONTACT_POTION_CONFIG'
@@ -26,27 +26,48 @@ app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 @app.route('/', methods=['GET', 'POST'])
 def contact():
-    config_section = 'default'
-    skin = 'skin_development.html'
+    request_config = get_request_config()
     form = ContactForm()
-    form.category.choices = [('1', 'one'), (2, 'two')]
-    print(form.category.choices)
+    form.category.choices = ((choice, choice)
+                             for choice in request_config['categories'])
     if request.method == 'POST':
         if form.validate():
-            send_message(form)
+            send_message(form, request_config)
             return 'Message sent'
-    return render_template('contact.html', skin=skin, form=form)
+    return render_template('contact.html',
+                           skin=request_config['skin'],
+                           form=form)
 
 
-def send_message(form, app):
-    message = Message(form.subject.data,
-                      sender=app.config['MAIL_SENDER'],
-                      recipients=['mike@bloy.org'])
+def send_message(form, request_config):
+    subject = "[{0}] {1}".format(form.category.data, form.subject.data)
+    subject = re.sub(r'\s+', ' ', subject)
+    message = Message(subject,
+                      sender=request_config['sender'],
+                      recipients=request_config['recipients'])
     message.body = """
     Website contact message from {0} ({1}):
 
     {2}""".format(form.name.data, form.email.data, form.message.data)
     mail.send(message)
+
+
+def get_request_config():
+    required_options = ['categories', 'recipients', 'sender']
+    config_section = 'development'
+
+    if not all(config.has_option(config_section, option)
+            for option in required_options):
+        abort(404)
+
+    request_config = {key: config.get(config_section, key)
+                      for key in required_options}
+    request_config['skin'] = 'skin_{0}.html'.format(config_section)
+    request_config['categories'] = re.split(r';\s*',
+                                            request_config['categories'])
+    request_config['recipients'] = re.split(r',\s*',
+                                            request_config['recipients'])
+    return request_config
 
 
 if __name__ == '__main__':
