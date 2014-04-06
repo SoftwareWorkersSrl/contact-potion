@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask.ext.mail import Message, Mail
 from forms import ContactForm
+from wsgi import ReverseProxied
 from ConfigParser import RawConfigParser
 
 import os
@@ -20,6 +21,8 @@ app.config['MAIL_USE_SSL'] = config.getboolean('GLOBAL', 'mailusessl')
 
 mail = Mail()
 mail.init_app(app)
+
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 @app.route('/', methods=['GET', 'POST'])
 def contact():
