@@ -54,7 +54,9 @@ def send_message(form, request_config):
 
 def get_request_config():
     required_options = ['categories', 'recipients', 'sender']
-    config_section = 'development'
+    host = re.sub(r':', '_', request.headers['Host'])
+    if not config.has_option('HOSTS', host): abort(404)
+    config_section = config.get('HOSTS', host)
 
     if not all(config.has_option(config_section, option)
             for option in required_options):
