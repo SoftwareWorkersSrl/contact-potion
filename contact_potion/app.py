@@ -6,7 +6,6 @@ from ConfigParser import RawConfigParser
 import os
 import re
 
-MAGIC_HEADER = 'X-Contact-Potion-Config'
 CONFIG_ENV = 'CONTACT_POTION_CONFIG'
 
 config_filename = os.getenv(CONFIG_ENV, 'sample.config')
