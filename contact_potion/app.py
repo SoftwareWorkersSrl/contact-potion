@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, redirect
 from flask.ext.mail import Message, Mail
 from forms import ContactForm
 from wsgi import ReverseProxied
@@ -32,7 +32,7 @@ def contact():
     if request.method == 'POST':
         if form.validate():
             send_message(form, request_config)
-            return 'Message sent'
+            return redirect(request_config['success_url'])
     return render_template('contact.html',
                            skin=request_config['skin'],
                            form=form)
@@ -52,7 +52,7 @@ def send_message(form, request_config):
 
 
 def get_request_config():
-    required_options = ['categories', 'recipients', 'sender']
+    required_options = ['categories', 'recipients', 'sender', 'success_url']
     host = re.sub(r':', '_', request.headers['Host'])
     if not config.has_option('HOSTS', host): abort(404)
     config_section = config.get('HOSTS', host)
