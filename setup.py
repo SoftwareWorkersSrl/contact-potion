@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 setup(
     name='contact_potion',
     version='1.0',
-    long_descripton=__doc__,
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
