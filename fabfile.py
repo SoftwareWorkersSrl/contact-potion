@@ -1,5 +1,5 @@
 from time import time
-from fabric.api import run, put, local, task, cd, env
+from fabric.api import run, put, local, task, cd, env, sudo
 try:
     from local_fabfile import *
 except ImportError:
@@ -40,35 +40,18 @@ def update_environment():
     run('{0} {1}'.format(env.virtualenv, env.current_release))
     run('{0}/bin/pip install -r {0}/requirements.txt'.
         format(env.current_release))
-    update_supervisor()
-
-
-@task
-def update_supervisor():
-    """ update supervisor environment """
-    if not env.has_key('current_release'):
-        releases()
-
-    cmd = (
-        '{0}/bin/honcho'.format(env.current_release),
-        'export',
-        '-a contact_potion',
-        '-p {0}'.format(env.port_number),
-        '-u', env.user,
-        '-l {0}/shared/log'.format(env.base_dir),
-        '-f {0}/Procfile'.format(env.current_release),
-        'supervisord',
-        '{0}/supervisord.conf'.format(env.current_release),
-    )
-    run(' '.join(cmd))
 
 
 @task
 def symlink():
     if not env.has_key('current_release'):
         releases()
-    run('ln -nfs {0}/shared/log {1}/log'.format(env.base_dir,
-                                                env.current_release))
+
+    links = ('log', '.env')
+    for link in links:
+        run('ln -nfs {1}/shared/{0} {2}/{0}'.format(link,
+                                                    env.base_dir,
+                                                    env.current_release))
     run('ln -nfs {0} {1}/current'.format(env.current_release, env.base_dir))
 
 
