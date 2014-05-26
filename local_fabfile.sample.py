@@ -7,6 +7,7 @@ def production():
     env.hosts = [
         'SERVERHOSTNAME'
     ]
+    env.port_number = 5000
     env.base_dir = '/path/to/server/base/dir'
     env.git_repo = 'git@github.com:path/to/git/repo'
     env.git_branch = 'master'
