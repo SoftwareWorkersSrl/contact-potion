@@ -17,6 +17,8 @@ app.secret_key = config.get('GLOBAL', 'secret_key')
 app.config['MAIL_SERVER'] = config.get('GLOBAL', 'mailserver')
 app.config['MAIL_PORT'] = config.getint('GLOBAL', 'mailport')
 app.config['MAIL_USE_SSL'] = config.getboolean('GLOBAL', 'mailusessl')
+app.config['MAIL_USERNAME'] = config.getint('GLOBAL', 'username')
+app.config['MAIL_PASSWORD'] = config.getboolean('GLOBAL', 'password')
 
 mail = Mail()
 mail.init_app(app)

@@ -1,3 +1,4 @@
 /dist
 /contact_potion.egg-info
 /local_fabfile.py
+*.swp
